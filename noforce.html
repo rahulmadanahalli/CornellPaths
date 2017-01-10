@@ -8,8 +8,8 @@
 
     .link {
       fill: none;
-      stroke: #666;
-      stroke-width: 1.5px;
+      stroke: #bbb;
+      stroke-width: 1px;
     }
 
     .nodes circle {
@@ -33,6 +33,12 @@
             //var dataset = data.data.classes;
             var nodes = {};
             var links = [];
+            var svg = d3.select("svg"),
+            width = +svg.attr("width"),
+            height = +svg.attr("height"),
+            radius = 5,
+            textWidth = 8;
+
 
             for (var i = 0; i < data.length; i++) {
                 var collegeClass = data[i];
@@ -53,56 +59,31 @@
               if (!nodes[link.source]) {
                 var group = parseInt(link.source.split(" ")[1].charAt(0));
                 group = group >= 5 ? 5 : group;
-                var node = {"id": link.source, "group" : group};
+                var x = width * Math.random();
+                var y = height * (group - 1)/5.0 + Math.random()*height/5;
+                var node = {"id": link.source, "group" : group, "x" : x, "y" : y};
+                if (!x) {
+                  console.log(node);
+                }
                 nodes[link.source] = node;
               }
               if (!nodes[link.target]) {
                 var group = parseInt(link.target.split(' ')[1].charAt(0));
                 group = group >= 5 ? 5 : group;
-                var node = {id: link.target, "group" : group};
+                var x = width * Math.random();
+                var y = height * (group - 1)/5.0 + Math.random()*height/5;
+                var node = {"id": link.target, "group" : group, "x" : x, "y" : y};
+                if (!x) {
+                  console.log(node);
+                }
                 nodes[link.target] = node;
               }
             });
+            console.log(nodes);
 
-            var svg = d3.select("svg"),
-            width = +svg.attr("width"),
-            height = +svg.attr("height"),
-            radius = 5,
-            textWidth = 8;
-
+            
 
             var color = d3.scaleOrdinal(d3.schemeCategory20);
-
-            var simulation = d3.forceSimulation()
-                .force("link", d3.forceLink()
-                    .id(function(d) { return d.id; }) // specifies that a link's source/target refers to the id of the node.
-                    //.distance(40)
-                    .strength(0)
-                    ) 
-                //.force("charge", d3.forceManyBody().strength(-200))
-                .force("center", d3.forceCenter().x(width/2).y(height/2))
-                /*.force("yAxis", d3.forceY()
-                    .strength( function(d) {
-                        return (d.y <= width * d.group/5.0 && d.y >= width * (d.group - 1)/5.0) ? 0 : .5;
-                    })
-                    .y( function(d) {
-                        if (d.y <= height * d.group/5.0 && d.y >= height * (d.group - 1)/5.0) {
-                            return 0;
-                        }
-                        return height * (d.group - 1)/5.0 + height/10.0; 
-                    })
-                )*/;
-
-            simulation
-                .nodes(d3.values(nodes))
-                .on("tick", ticked)
-                ;
-            console.log(nodes);
-
-            simulation.force("link")
-                .links(links);
-
-            console.log(nodes);
             
 
                 // build the arrow.
@@ -115,8 +96,8 @@
                 .attr("refY", -1.5)
                 .attr("markerWidth", 6)
                 .attr("markerHeight", 6)
-                .attr("stroke", "lightblue")
-                .attr("fill", "lightblue")
+                .attr("stroke", "grey")
+                .attr("fill", "grey")
                 .attr("orient", "auto")
               .append("svg:path")
                 .attr("d", "M0,-5L10,0L0,5");
@@ -127,10 +108,10 @@
                   .data(links)
                   .enter().append("line")
                 .attr("marker-end", "url(#end)")
-                .attr("x1", function (d) { return nodes[d.source.id].x; })
-                .attr("y1", function (d) { return nodes[d.source.id].y; })
-                .attr("x2", function (d) { return nodes[d.target.id].x; })
-                .attr("y2", function (d) { return nodes[d.target.id].y; }); 
+                .attr("x1", function (d) { return nodes[d.source].x; })
+                .attr("y1", function (d) { return nodes[d.source].y; })
+                .attr("x2", function (d) { return nodes[d.target].x; })
+                .attr("y2", function (d) { return nodes[d.target].y; }); 
 
 
 
@@ -142,106 +123,26 @@
                 .attr("r", radius)
                 .attr("fill", function(d) { return color(d.group + 10); })
                 .attr("cy", function(d) {
-                    return height * (d.group - 1)/5.0 + Math.random()*height/5;
+                    return d.y;
                 })
                 .attr("cx", function(d) {
-                    return width * Math.random();
+                    return d.x;
                 });
-
-            /*node.append("title")
-                .text(function(d) { return d.id; });*/
 
             var text = svg.append("g")
                 .attr("class", "text")
                 .selectAll("text")
                 .data(d3.values(nodes))
               .enter().append("text")
-                .attr("x", textWidth)
-                .attr("y", ".31em")
+                .attr("y", function(d) {
+                    console.log(JSON.stringify(d));
+                    return d.y;
+                })
+                .attr("x", function(d) {
+                    return d.x - 3*textWidth;
+                })
                 .text(function(d) { return d.id; });
 
-            // adds the links and the nodes to the force simulation initialized above
-            // creates relationship between source/target and the node id (from the link.id function above)
-            // now each link's source/target will contain x and y coordinate info th
-
-            
-
-            //ticked();
-
-            function ticked() {
-                var k = .5 * simulation.alpha();
-                console.log(nodes);
-
-              // by now, the position coordinates have been updated by the initialized forces
-              // so we now need to visually update the x and y coordinates of the links and nodes
-
-              // d represents a link in the links list, the source becomes an object that retains the name,
-              // and adds the x and y coordinate of the source.
-              
-              
-              // d represents a node in the node list
-              
-                //force2.restart();
-                
-                // Push nodes toward their designated focus.
-                /*nodes.forEach(function(d, i) {
-                  if (d.y <= height * d.group/5.0 && d.y >= height * (d.group - 1)/5.0) {
-                    return;
-                  }
-                  var dest = height * (d.group - 1)/5.0 + Math.random()*height/5;
-                  d.y += (dest - d.y) * k;    
-                });*/
-
-                /*links.forEach( function(l, i) {
-                    if (l.source.y < l.target.y) {
-                        return;
-                    }
-                    l.target.y += Math.min(l.source.y + 50, height - radius) * k;
-                    l.source.y -= Math.max(l.target.y - 50, radius) * k;
-                    if (Math.abs(l.source.x - l.target.y) < 20) {
-                        if (Math.random() > 0.5) {
-                            l.source.x -= 10;
-                            l.target.x += 10;
-                        } else {
-                            l.source.x += 10;
-                            l.target.x -= 10;
-                        }
-                    }
-                });*/
-
-                node
-                    .attr("cx", function(d) { return d.x = Math.max(2 * radius, Math.min(width - 2 * radius - 2 * textWidth, d.x)); })
-                    .attr("cy", function(d) { return d.y = Math.max(2 * radius, Math.min(height - 2 * radius, d.y)); });
-                link
-                      .attr("x1", function (d) { return nodes[d.source.id].x; })
-                      .attr("y1", function (d) { return nodes[d.source.id].y; })
-                      .attr("x2", function (d) { return nodes[d.target.id].x; })
-                      .attr("y2", function (d) { return nodes[d.target.id].y; });    
-
-                text
-                  .attr("x", function(d) { return d.x = Math.max(textWidth, Math.min(width - textWidth, d.x)); })
-                  .attr("y", function(d) { return d.y = Math.max(radius, Math.min(height - radius, d.y)); });
-                  
-            }
-            /*
-            d3.select("body").selectAll("p")
-                .data(data)
-                .enter()
-                .append("p")
-                .text(function(d) {
-                    var preReqString = d.catalogPrereqCoreq;
-                    var className = d.subject + " " + d.catalogNbr;
-                    if (!preReqString) {
-                        return className;
-                    }
-                    var matches = preReqString.match(/[A-Z]* \d{4}/g);
-                    if (!matches) {
-                        return className;
-                    }
-                    return className + ": " + matches + "." + "\n" + preReqString + ".";
-                });
-            */
-            // Your beautiful D3 code will go here
         </script>
     </body>
 </html>     
