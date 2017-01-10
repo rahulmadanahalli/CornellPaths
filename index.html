@@ -124,11 +124,7 @@
                   .selectAll("line")
                   .data(links)
                   .enter().append("line")
-                .attr("marker-end", "url(#end)")
-                .attr("x1", function (d) { return nodes[d.source.id].x; })
-                .attr("y1", function (d) { return nodes[d.source.id].y; })
-                .attr("x2", function (d) { return nodes[d.target.id].x; })
-                .attr("y2", function (d) { return nodes[d.target.id].y; }); 
+                .attr("marker-end", "url(#end)"); 
 
 
 
@@ -144,10 +140,30 @@
                 })
                 .attr("cx", function(d) {
                     return width * Math.random();
-                });
+                })
+                .call(d3.drag()
+                  .on("start", dragstarted)
+                  .on("drag", dragged)
+                  .on("end", dragended));
 
-            /*node.append("title")
-                .text(function(d) { return d.id; });*/
+            function dragstarted(d) {
+              if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+              d.fx = d.x;
+              d.fy = d.y;
+            }
+
+            function dragged(d) {
+              d.fx = d3.event.x;
+              d.fy = d3.event.y;
+            }
+
+            function dragended(d) {
+              if (!d3.event.active) simulation.alphaTarget(0);
+              d.fx = null;
+              d.fy = null;
+            }
+
+            
 
             var text = svg.append("g")
                 .attr("class", "text")
@@ -185,11 +201,11 @@
               // d represents a node in the node list
 
                 links.forEach( function(l, i) {
-                    if (l.source.y + 30 < l.target.y) {
+                    if (l.source.y + 50 < l.target.y) {
                         return;
                     }
-                    l.target.y += Math.min(l.source.y + 50, height - radius) * k;
-                    l.source.y -= Math.max(l.target.y - 50, radius) * k;
+                    l.target.y += Math.min(l.source.y + 5, height - radius) * k;
+                    l.source.y -= Math.max(l.target.y - 5, radius) * k;
                     
                 });
 
