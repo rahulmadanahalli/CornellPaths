@@ -54,19 +54,19 @@
                 }
             }
             links.forEach(function(link) {
-              if (!nodes[link.source]) {
-                var group = parseInt(link.source.split(" ")[1].charAt(0));
-                group = group >= 5 ? 5 : group;
-                var node = {"id": link.source, "group" : group};
-                nodes[link.source] = node;
-              }
-              if (!nodes[link.target]) {
-                var group = parseInt(link.target.split(' ')[1].charAt(0));
-                group = group >= 5 ? 5 : group;
-                var node = {id: link.target, "group" : group};
-                nodes[link.target] = node;
-              }
+              addToNodes(link.source);
+              addToNodes(link.target);
             });
+
+            function addToNodes(node_id) {
+              if (nodes[node_id]) {
+                return;
+              }
+              var group = parseInt(node_id.split(" ")[1].charAt(0));
+              group = group >= 5 ? 5 : group;
+              var node = {"id": node_id, "group" : group};
+              nodes[node_id] = node;
+            }
 
             var svg = d3.select("svg"),
             width = +svg.attr("width"),
