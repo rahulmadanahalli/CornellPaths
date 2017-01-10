@@ -120,19 +120,19 @@
                 .attr("d", "M0,-5L10,0L0,5");
 
             var link = svg.append("g")
-                    .attr("class", "link")
-                  .selectAll("line")
+                  .selectAll("path")
                   .data(links)
-                  .enter().append("line")
+                  .enter().append("path")
+                .attr("class", "link")
                 .attr("marker-end", "url(#end)"); 
 
 
 
             var node = svg.append("g")
-                .attr("class", "nodes")
                   .selectAll("circle")
                   .data(d3.values(nodes))
                   .enter().append("circle")
+                .attr("class", "nodes")
                 .attr("r", radius)
                 .attr("fill", function(d) { return color(d.group + 10); })
                 .attr("cy", function(d) {
@@ -163,8 +163,6 @@
               d.fy = null;
             }
 
-            
-
             var text = svg.append("g")
                 .attr("class", "text")
                 .selectAll("text")
@@ -178,18 +176,8 @@
             // creates relationship between source/target and the node id (from the link.id function above)
             // now each link's source/target will contain x and y coordinate info th
 
-            
-
-            function linkArc(d) {
-              var dx = d.target.x - d.source.x,
-                  dy = d.target.y - d.source.y,
-                  dr = Math.sqrt(dx * dx + dy * dy);
-              return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
-            }
-
             function ticked() {
                 var k = .5 * simulation.alpha();
-                console.log(nodes);
 
               // by now, the position coordinates have been updated by the initialized forces
               // so we now need to visually update the x and y coordinates of the links and nodes
@@ -201,7 +189,7 @@
               // d represents a node in the node list
 
                 links.forEach( function(l, i) {
-                    if (l.source.y + 50 < l.target.y) {
+                    if (l.source.y + 30 < l.target.y) {
                         return;
                     }
                     l.target.y += Math.min(l.source.y + 5, height - radius) * k;
@@ -218,7 +206,17 @@
                       .attr("x2", function (d) { return d.target.x; })
                       .attr("y2", function (d) { return d.target.y; });   
 
-
+                link.attr("d", function(d) {
+                    var dx = d.target.x - d.source.x,
+                        dy = d.target.y - d.source.y,
+                        dr = Math.sqrt(dx * dx + dy * dy);
+                    return "M" + 
+                        d.source.x + "," + 
+                        d.source.y + "A" + 
+                        dr + "," + dr + " 0 0,1 " + 
+                        d.target.x + "," + 
+                        d.target.y;
+                });
                 text
                   .attr("x", function(d) { return d.x - 3*textWidth; })
                   .attr("y", function(d) { return d.y; });
