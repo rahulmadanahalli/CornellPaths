@@ -27,9 +27,10 @@
 
     </style>
     <body>
-        <svg width="1200" height="700"></svg>
+        <svg width="2400" height="1400"></svg>
         <script src="https://d3js.org/d3.v4.min.js"></script>
         <script type="text/javascript">
+            //1200 700
             var focus_node = null, highlight_node = null;
             var highlight_color = "blue";
             var highlight_trans = 0.1;
@@ -73,18 +74,30 @@
             function getClasses(rosters) {
                 var classes = [];
                 for (var i = 0; i < rosters.length; i++) {
-                    if (rosters[i].match(/WI*/g)) {
+                    if (rosters[i].match(/WI*/g) || rosters[i] != "FA15") {
                         continue;
                     }
-                    var requestClassesForSemester = new XMLHttpRequest();
-                    requestClassesForSemester.open('GET', "https://classes.cornell.edu/api/2.0/search/classes.json?roster=" + rosters[i] + "&subject=AEM", false);
-                    requestClassesForSemester.send();
-                    if (requestClassesForSemester.status != 200) {
+                    var requestSubjects = new XMLHttpRequest();
+                    requestSubjects.open('GET', "https://classes.cornell.edu/api/2.0/config/subjects.json?roster=" + rosters[i], false);
+                    requestSubjects.send();
+
+                    if (requestSubjects.status != 200) {
                         continue;
                     }
-                    var response = JSON.parse(requestClassesForSemester.responseText);
-                    classes = classes.concat(response.data.classes);
-                    console.log(classes);
+                    var subjects = JSON.parse(requestSubjects.responseText).data.subjects;
+                    
+                    for (var j = 0; j < subjects.length; j++) {
+                        var subjectAcronym = subjects[j].value
+
+                        var requestClassesForSemester = new XMLHttpRequest();
+                        requestClassesForSemester.open('GET', "https://classes.cornell.edu/api/2.0/search/classes.json?roster=" + rosters[i] + "&subject=" + subjectAcronym, false);
+                        requestClassesForSemester.send();
+                        if (requestClassesForSemester.status != 200) {
+                            continue;
+                        }
+                        var response = JSON.parse(requestClassesForSemester.responseText);
+                        classes = classes.concat(response.data.classes);
+                    }
                 }
                 createGraph(classes);
             }
