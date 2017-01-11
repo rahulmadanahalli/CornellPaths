@@ -38,26 +38,71 @@
             //data = data.concat(dataMath);
             //data = dataMath;
             //data = dataPsych;
-            data = dataAem;
-            var nodesMap = {};
-            var linksMap = {};
-            var nodesList = [];
-            var linksList = [];
+
+             
+
             var focus_node = null, highlight_node = null;
             var highlight_color = "blue";
             var highlight_trans = 0.1;
             var min_zoom = 0.1;
             var max_zoom = 3;
             var zoom = d3.zoom().scaleExtent([min_zoom,max_zoom]);
-            var svg = d3.select("svg"),
-            width = +svg.attr("width"),
-            height = +svg.attr("height"),
-            radius = 8,
-            textWidth = 8;
+            var svg = d3.select("svg");
+            var width = +svg.attr("width");
+            var height = +svg.attr("height");
+            var radius = 8;
+            var textWidth = 8;
 
             var color = d3.scaleOrdinal(d3.schemeCategory20);
 
-            var simulation = d3.forceSimulation()
+            var nodesMap = {};
+            var linksMap = {};
+            var nodesList = [];
+            var linksList = [];
+
+            var requestRosters = new XMLHttpRequest();
+            requestRosters.open('GET', "https://classes.cornell.edu/api/2.0/config/rosters.json", true);
+            requestRosters.send();
+             
+            requestRosters.onreadystatechange = processRequestForRosters;
+
+            function processRequestForRosters(e) {
+                if (requestRosters.readyState != 4 || requestRosters.status != 200) {
+                    return;
+                }
+                var response = JSON.parse(requestRosters.responseText);
+                var data = response.data.rosters;
+                var rosters = [];
+                for (var i = 0; i < data.length; i++) {
+                    rosters.push(data[i].slug);
+                }
+                console.log(rosters);
+
+                getClasses(rosters);
+            }
+
+            function getClasses(rosters) {
+                var classes = [];
+                for (var i = 0; i < rosters.length; i++) {
+                    if (rosters[i].match(/WI*/g)) {
+                        continue;
+                    }
+                    var requestClassesForSemester = new XMLHttpRequest();
+                    requestClassesForSemester.open('GET', "https://classes.cornell.edu/api/2.0/search/classes.json?roster=" + rosters[i] + "&subject=CS", false);
+                    requestClassesForSemester.send();
+                    if (requestClassesForSemester.status != 200) {
+                        continue;
+                    }
+                    var response = JSON.parse(requestClassesForSemester.responseText);
+                    classes = classes.concat(response.data.classes);
+                    console.log(classes);
+                }
+                createGraph(classes);
+            }
+            
+
+            function createGraph(classes) {
+                var simulation = d3.forceSimulation()
                 .force("link", d3.forceLink()
                     .id(function(d) { return d.id; }) // specifies that a link's source/target refers to the id of the node.
                     ) 
@@ -89,8 +134,8 @@
               svg.call(zoom);
               
 
-            for (var i = 0; i < data.length; i++) {
-                var collegeClass = data[i];
+            for (var i = 0; i < classes.length; i++) {
+                var collegeClass = classes[i];
                 var preReqString = collegeClass.catalogPrereqCoreq;
                 var className = collegeClass.subject + " " + collegeClass.catalogNbr;
                 if (!preReqString) {
@@ -109,6 +154,7 @@
             linksList.forEach(function(link) {
               addToNodes(link.source);
               addToNodes(link.target);
+              nodesMap[link.target]["prereqs"].push(link.source);
             });
 
             function addToNodes(node_id) {
@@ -117,7 +163,7 @@
               }
               var group = parseInt(node_id.split(" ")[1].charAt(0));
               group = group >= 5 ? 5 : group;
-              var node = {"id": node_id, "group" : group};
+              var node = {"id": node_id, "group" : group, "prereqs" : []};
               nodesMap[node_id] = node;
             }
 
@@ -126,8 +172,7 @@
 
             simulation
                 .nodes(nodesList)
-                .on("tick", ticked)
-                ;
+                .on("tick", ticked);
             simulation.force("link")
                 .links(linksList);
 
@@ -174,9 +219,11 @@
                     return width * Math.random();
                 })
                 .on("mouseover", function (d) {
+                    svg.style("cursor","pointer");
                     set_highlight(d);
                 })
                 .on("mouseout", function (d) {
+                    svg.style("cursor","move");
                     exit_highlight(d);
                 })
                 .call(d3.drag()
@@ -191,11 +238,17 @@
                 }
                 highlight_node = d;
 
+                /*
+                var prereqs = d.prereqs;
+                for (var i = 0; i < prereqs.length; i++) {
+                    prereqs.concat(nodesMap[prereqs[i]].prereqs);
+                }*/
+
                 if (highlight_color!="white") {
                       node.style("stroke", function(o) {
                             return isPrereq(d, o) ? highlight_color : (isNextClass(d,o) ? "red" : "white"); });
                         text.style("font-weight", function(o) {
-                            return isPrereq(d, o) ? "bold" : "normal";});
+                            return (isPrereq(d, o) || isNextClass(d,o)) ? "bold" : "normal";});
                         link.style("stroke", function(o) {
                           return o.target.id == d.id ? highlight_color : (o.source.id == d.id ? "red" : "#eee");
                         });
@@ -310,6 +363,10 @@
                   .attr("y", function(d) { return d.y; });
                   
             }
+            }
+           
+
+            
         </script>
     </body>
 </html>     
