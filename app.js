@@ -86,12 +86,37 @@ zoom.on("zoom", function() {
 });
 
   svg.call(zoom);
-  
+
+var blacklist = [];
+var combined = {};
 
 for (var i = 0; i < classes.length; i++) {
     var collegeClass = classes[i];
+    var crossListedClasses = collegeClass.enrollGroups[0].simpleCombinations;
+    var className = collegeClass.subject + " " + collegeClass.catalogNbr;
+    for (var j = 0; j < crossListedClasses.length; j++) {
+        var crossListedClass = crossListedClasses[j];
+        var crossListedClassName = crossListedClass.subject + " " + crossListedClass.catalogNbr;
+        if (crossListedClass.subject != "CS") {
+            blacklist.push(crossListedClassName);
+        } else if (!combined[className] && collegeClass.catalogNbr != crossListedClass.catalogNbr) {
+            console.log()
+            var combinedName = (collegeClass.catalogNbr < crossListedClass.catalogNbr) ? 
+                                    collegeClass.subject + " " + collegeClass.catalogNbr + "/" + crossListedClass.catalogNbr
+                                    : collegeClass.subject + " " + crossListedClass.catalogNbr + "/" + collegeClass.catalogNbr
+            combined[crossListedClassName] = combinedName;
+            combined[className] = combinedName;
+        }
+    }
+}
+console.log(combined);
+
+for (var i = 0; i < classes.length; i++) {
+    var collegeClass = classes[i];
+    //console.log(collegeClass.enrollGroups[0].simpleCombinations);
     var preReqString = collegeClass.catalogPrereqCoreq;
     var className = collegeClass.subject + " " + collegeClass.catalogNbr;
+    className = combined[className] ? combined[className] : className;
     if (!preReqString) {
         continue;
     }
@@ -105,22 +130,27 @@ for (var i = 0; i < classes.length; i++) {
         }
         if (preReqSentence.indexOf("Corequisite") != -1 || 
             preReqSentence.indexOf("Prerequisite or corequisite") != -1) {
-            addLinks(className, preReqSentence, "coreq");
+            addLinks(combined, blacklist, className, preReqSentence, "coreq");
         } else if (preReqSentence.indexOf("Prerequisite:") != -1 ||
             preReqSentence.indexOf("Required prerequisite:") != -1) {
-            addLinks(className, preReqSentence, "prereq");
+            addLinks(combined, blacklist, className, preReqSentence, "prereq");
         }
     }
     
 }
 
-function addLinks(className, preReqString, type) {
+function addLinks(combined, blacklist, className, preReqString, type) {
     var matches = preReqString.match(/[A-Z]+ \d{4}/g);
     if (!matches) {
         return;
     }
     for (var i = 0; i < matches.length; i++) {
-        linksMap[matches[i] + "," + className] = {"source" : matches[i], "target" : className, "type" : type};
+        var match = combined[matches[i]] ? combined[matches[i]] : matches[i];
+        //var match = matches[i];
+        if (blacklist.includes(match)) {
+            continue;
+        }
+        linksMap[match + "," + className] = {"source" : match, "target" : className, "type" : type};
     }
 }
 
