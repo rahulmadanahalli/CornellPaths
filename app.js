@@ -43,7 +43,7 @@ function getClasses(rosters) {
             continue;
         }
         var requestClassesForSemester = new XMLHttpRequest();
-        requestClassesForSemester.open('GET', "https://classes.cornell.edu/api/2.0/search/classes.json?roster=" + rosters[i] + "&subject=AEM", false);
+        requestClassesForSemester.open('GET', "https://classes.cornell.edu/api/2.0/search/classes.json?roster=" + rosters[i] + "&subject=CS", false);
         requestClassesForSemester.send();
         if (requestClassesForSemester.status != 200) {
             continue;
@@ -95,14 +95,35 @@ for (var i = 0; i < classes.length; i++) {
     if (!preReqString) {
         continue;
     }
-    var matches = preReqString.match(/[A-Z]* \d{4}/g);
-    if (!matches) {
-        continue;
+    
+    var preReqSentences = preReqString.split(".");
+
+    for (var j = 0; j < preReqSentences.length; j++) {
+        var preReqSentence = preReqSentences[j];
+        if (!preReqSentence) {
+            continue;
+        }
+        if (preReqSentence.indexOf("Corequisite") != -1 || 
+            preReqSentence.indexOf("Prerequisite or corequisite") != -1) {
+            addLinks(className, preReqSentence, "coreq");
+        } else if (preReqSentence.indexOf("Prerequisite:") != -1 ||
+            preReqSentence.indexOf("Required prerequisite:") != -1) {
+            addLinks(className, preReqSentence, "prereq");
+        }
     }
-    for (var j = 0; j < matches.length; j++) {
-        linksMap[matches[j] + "," + className] = {"source" : matches[j], "target" : className};
+    
+}
+
+function addLinks(className, preReqString, type) {
+    var matches = preReqString.match(/[A-Z]+ \d{4}/g);
+    if (!matches) {
+        return;
+    }
+    for (var i = 0; i < matches.length; i++) {
+        linksMap[matches[i] + "," + className] = {"source" : matches[i], "target" : className, "type" : type};
     }
 }
+
 linksList = d3.values(linksMap);
 
 linksList.forEach(function(link) {
@@ -154,7 +175,7 @@ var link = svg.append("g")
       .selectAll("path")
       .data(linksList)
       .enter().append("path")
-    .attr("class", "link")
+    .attr("class", function(d) { return "link " + d.type; })
     .attr("marker-end", "url(#end)"); 
 
 
@@ -186,7 +207,7 @@ var node = svg.append("g")
       .on("end", dragended));
 
 function set_highlight(d) {
-    //svg.style("cursor","pointer");
+    svg.style("cursor","pointer");
     if (focus_node!==null) {
         d = focus_node;
     }
