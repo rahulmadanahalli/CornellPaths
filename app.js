@@ -17,45 +17,19 @@ var linksMap = {};
 var nodesList = [];
 var linksList = [];
 
-var requestRosters = new XMLHttpRequest();
-requestRosters.open('GET', "https://classes.cornell.edu/api/2.0/config/rosters.json", true);
-requestRosters.send();
- 
-requestRosters.onreadystatechange = processRequestForRosters;
+function createGraph(subject, classes) {
+    nodesMap = {};
+    linksMap = {};
+    nodesList = [];
+    linksList= [];
 
-function processRequestForRosters(e) {
-    if (requestRosters.readyState != 4 || requestRosters.status != 200) {
-        return;
-    }
-    var response = JSON.parse(requestRosters.responseText);
-    var data = response.data.rosters;
-    var rosters = [];
-    for (var i = 0; i < data.length; i++) {
-        rosters.push(data[i].slug);
-    }
-    getClasses(rosters);
-}
-
-function getClasses(rosters) {
-    var classes = [];
-    for (var i = 0; i < rosters.length; i++) {
-        if (rosters[i].match(/WI*/g)) {
-            continue;
-        }
-        var requestClassesForSemester = new XMLHttpRequest();
-        requestClassesForSemester.open('GET', "https://classes.cornell.edu/api/2.0/search/classes.json?roster=" + rosters[i] + "&subject=CS", false);
-        requestClassesForSemester.send();
-        if (requestClassesForSemester.status != 200) {
-            continue;
-        }
-        var response = JSON.parse(requestClassesForSemester.responseText);
-        classes = classes.concat(response.data.classes);
-    }
-    createGraph(classes);
-}
+    zoom = d3.zoom().scaleExtent([min_zoom,max_zoom]);
+    svg = d3.select("svg");
+    width = +svg.attr("width");
+    height = +svg.attr("height");
 
 
-function createGraph(classes) {
+    console.log("got here");
     var simulation = d3.forceSimulation()
     .force("link", d3.forceLink()
         .id(function(d) { return d.id; }) // specifies that a link's source/target refers to the id of the node.
@@ -97,10 +71,9 @@ for (var i = 0; i < classes.length; i++) {
     for (var j = 0; j < crossListedClasses.length; j++) {
         var crossListedClass = crossListedClasses[j];
         var crossListedClassName = crossListedClass.subject + " " + crossListedClass.catalogNbr;
-        if (crossListedClass.subject != "CS") {
+        if (crossListedClass.subject != subject) {
             blacklist.push(crossListedClassName);
         } else if (!combined[className] && collegeClass.catalogNbr != crossListedClass.catalogNbr) {
-            console.log()
             var combinedName = (collegeClass.catalogNbr < crossListedClass.catalogNbr) ? 
                                     collegeClass.subject + " " + collegeClass.catalogNbr + "/" + crossListedClass.catalogNbr
                                     : collegeClass.subject + " " + crossListedClass.catalogNbr + "/" + collegeClass.catalogNbr
@@ -117,6 +90,8 @@ for (var i = 0; i < classes.length; i++) {
     var preReqString = collegeClass.catalogPrereqCoreq;
     var className = collegeClass.subject + " " + collegeClass.catalogNbr;
     className = combined[className] ? combined[className] : className;
+    // adds all courses in a subject to the graph (regardless if they have any links or not)
+    addToNodes(className);
     if (!preReqString) {
         continue;
     }
@@ -156,6 +131,7 @@ function addLinks(combined, blacklist, className, preReqString, type) {
 
 linksList = d3.values(linksMap);
 
+// this allows us to add pre-reqs from a different subject to the graph
 linksList.forEach(function(link) {
   addToNodes(link.source);
   addToNodes(link.target);

@@ -2,36 +2,88 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html">
         <title>Cornell Paths</title>
+        <meta name="author" content="Jake Rocheleau">
+        <link rel="shortcut icon" href="http://designm.ag/favicon.ico">
+        <link rel="icon" href="http://designm.ag/favicon.ico">
+           <link rel="stylesheet" href="css/selectize.css">
+          <link rel="stylesheet" href="css/normalize.css">
+          <link rel="stylesheet" href="css/stylesheet.css">
+          <link rel="stylesheet" href="css/subjectSelect.css">
+          <link rel="stylesheet" href="css/graph.css">
+        <script src="https://code.jquery.com/jquery-1.10.2.min.js"
+          integrity="sha256-C6CB9UYIS9UJeqinPHWTHVqh/E1uhG5Twh+Y5qFQmYg="
+          crossorigin="anonymous"></script>
+        <script type="text/javascript" src="js/selectize.min.js"></script>
     </head>
-    <style>
-
-    .link {
-      fill: none;
-      stroke: #999;
-      stroke-width: 1.25px;
-      stroke-opacity: 0.6;
-    }
-
-    .link.coreq {
-        stroke-dasharray: 0,2 1;
-    }
-
-    .nodes circle {
-      stroke: #fff;
-      stroke-width: 1.5px;
-    }
-
-    text {
-      font: 10px sans-serif;
-      pointer-events: none;
-      text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
-    }
-
-    </style>
+    
     <body>
-        <svg width="1200" height="700"></svg>
         <script src="https://d3js.org/d3.v4.min.js"></script>
-        <script src="app.js"></script>
+        <script type="text/javascript" src="data.js"></script>
+        <div id="wrapper">
+        <div class="demo">
+            <div class="control-group">
+                <label for="select-subject">Subject</label>
+                <select id="select-subject" class="subjects" placeholder="Pick a subject!"></select>
+            </div>      
+        </div>
+        <script>
+                $select_subject = $('#select-subject').selectize({
+                    persist: false,
+                    maxItems: 2,
+                    valueField: 'subject',
+                    labelField: 'subjectName',
+                    searchField: ['subjectName', 'subject'],
+                    sortField: [
+                        {field: 'subjectName', direction: 'asc'},
+                        {field: 'subject', direction: 'asc'}
+                    ],
+                    options: [
+                        {subjectName: 'Computer Science', subject: 'CS'},
+                        {subjectName: 'Applied Economics Management', subject: 'AEM'}
+                    ],
+                    render: {
+                        item: function(item, escape) {
+                            var name = item.subjectName;
+                            return '<div>' +
+                                (name ? '<span class="subjectName">' + escape(name) + '</span>' : '') +
+                                (item.subject ? '<span class="subject">' + escape(item.subject) + '</span>' : '') +
+                            '</div>';
+                        },
+                        option: function(item, escape) {
+                            var name = item.subjectName;
+                            var label = name || item.subject;
+                            var caption = name ? item.subject : null;
+                            return '<div>' +
+                                '<span class="label">' + escape(label) + '</span>' +
+                                (caption ? '<span class="caption">' + escape(caption) + '</span>' : '') +
+                            '</div>';
+                        }
+                    },
+                    createFilter: function(input) {
+                        console.log("filter: " + input);
+                        return true;
+                    },
+                    create: function(input) {
+                        console.log("create: " + input);
+                        
+                        return {subjectName : input.subjectName };
+                    },
+                    onChange: function(value) {
+                        console.log("value: " + value);
+                        if (!value) {
+                            return;
+                        }
+                        clearGraph();
+                        addSubjectToGraph(value[0]);
+                        return;
+                    }
+                });
+        </script>
+        <div class="index">
+            <svg width="1200" height="700"></svg>
+            <script src="app.js"></script>
+        </div>
     </body>
 </html>     
