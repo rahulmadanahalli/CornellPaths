@@ -206,11 +206,7 @@ var node = svg.append("g")
     .on("mouseout", function (d) {
         svg.style("cursor","move");
         exit_highlight(d);
-    })
-    .call(d3.drag()
-      .on("start", dragstarted)
-      .on("drag", dragged)
-      .on("end", dragended));
+    });
 
 function set_highlight(d) {
     svg.style("cursor","pointer");
@@ -261,7 +257,7 @@ function exit_highlight()
         }
     }
 }
-
+/*
 
 function dragstarted(d) {
   if (!d3.event.active) simulation.alphaTarget(0.5).restart();
@@ -278,7 +274,7 @@ function dragended(d) {
   if (!d3.event.active) simulation.alphaTarget(0);
   d.fx = null;
   d.fy = null;
-}
+}*/
 
 node.on("dblclick.zoom", function(d) { d3.event.stopPropagation();
     var dcx = (window.innerWidth/2-d.x*zoom.scale());

@@ -1,5 +1,5 @@
 body {
-	margin: 25px 0;
+	margin: 10px 0;
 	padding: 0;
 	font-family: Helvetica, arial, sans-serif;
 	font-size: 15px;
@@ -36,38 +36,25 @@ p, .control-group {
 }
 .demo {
 	border-bottom: 1px solid #e8e8e8;
-	padding-top: 25px;
-	padding-bottom: 25px;
+	padding-top: 5px;
+	padding-bottom: 5px;
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
 	border-radius: 3px;
 }
 
-.demo:last-child {
-	border-bottom: 0 none;
-
-}
 .demo select, .demo input, .demo .selectize-control {
-	float: right;
-	flex: 1;
-	margin: 0 20px 0 0;
-}
-.demo > *:first-child {
-	margin-top: 0;
-	float: left;
-}
-.demo > *:last-child {
-	margin-bottom: 0;
+	width: 35%;
+	margin: 0 10px 10px 0;
 }
 .demo .value {
-	margin: 0 0 10px 0;
-	font-size: 12px;
+	font-size: 8px;
 }
 .demo .value span {
 	font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
 }
 .theme-selector {
-	margin-top: 10px;
+	margin-top: 5px;
 	font-size: 13px;
 }
 .theme-selector:before {
@@ -85,13 +72,13 @@ p, .control-group {
 	display: inline-block;
 }
 #wrapper > * {
-	padding-left: 100px;
-	padding-right: 100px;
+	padding-left: 50px;
+	padding-right: 50px;
 }
 pre {
 	background: #f8f8f8;
 	border: 1px solid #f2f2f2;
-	padding: 10px;
+	padding: 5px;
 	font-size: 12px;
 	font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
 	-webkit-border-radius: 3px;
@@ -130,7 +117,7 @@ input[type=button]:hover {
 		padding-right: 10px;
 	}
 	.demo {
-		padding: 20px;
+		padding: 5px;
 		-webkit-border-radius: 0;
 		-moz-border-radius: 0;
 		border-radius: 0;

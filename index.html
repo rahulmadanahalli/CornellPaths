@@ -11,6 +11,7 @@
           <link rel="stylesheet" href="css/normalize.css">
           <link rel="stylesheet" href="css/stylesheet.css">
           <link rel="stylesheet" href="css/subjectSelect.css">
+          <link rel="stylesheet" href="css/roster.css">
           <link rel="stylesheet" href="css/graph.css">
         <script src="https://code.jquery.com/jquery-1.10.2.min.js"
           integrity="sha256-C6CB9UYIS9UJeqinPHWTHVqh/E1uhG5Twh+Y5qFQmYg="
@@ -22,13 +23,99 @@
         <script src="https://d3js.org/d3.v4.min.js"></script>
         <script type="text/javascript" src="data.js"></script>
         <div id="wrapper">
-        <div class="demo">
-            <div class="control-group">
-                <label for="select-subject">Subject</label>
-                <select id="select-subject" class="subjects" placeholder="Pick a subject!"></select>
-            </div>      
-        </div>
-        <script>
+            <div class="demo">
+                <div class="control-group">
+                    <label for="select-roster">Roster</label>
+                    <select id="select-roster" class="rosters" placeholder="Pick a semester!"></select>
+                </div>
+                <div class="control-group">
+                    <label for="select-subject">Subject</label>
+                    <select id="select-subject" class="subjects" placeholder="Pick a subject!"></select>
+                </div> 
+                <script>
+
+                var select_roster, $select_roster;
+                var select_subject, $select_subject;
+
+                $select_roster = $('#select-roster').selectize({
+                    persist: false,
+                    maxItems: 1,
+                    valueField: 'roster',
+                    labelField: 'rosterName',
+                    searchField: ['rosterName', 'roster'],
+                    sortField: [
+                        {field: 'order', direction: 'desc'}
+                    ],
+                    render: {
+                        item: function(item, escape) {
+                            var name = item.rosterName;
+                            return '<div>' +
+                                (name ? '<span class="rosterName">' + escape(name) + '</span>' : '') +
+                                (item.roster ? '<span class="roster">' + escape(item.roster) + '</span>' : '') +
+                            '</div>';
+                        },
+                        option: function(item, escape) {
+                            var name = item.rosterName;
+                            var label = name || item.roster;
+                            var caption = name ? item.roster : null;
+                            return '<div>' +
+                                '<span class="label">' + escape(label) + '</span>' +
+                                (caption ? '<span class="caption">' + escape(caption) + '</span>' : '') +
+                            '</div>';
+                        }
+                    },
+                    load: function(query, callback) {
+                        var requestRosters = new XMLHttpRequest();
+                        requestRosters.open('GET', "https://classes.cornell.edu/api/2.0/config/rosters.json", true);
+                        requestRosters.send();
+     
+                        requestRosters.onreadystatechange = function(e) {
+                            if (this.readyState != 4 || this.status != 200) {
+                                return;
+                            }
+                            var responseJson = JSON.parse(this.responseText);
+                            var data = responseJson.data.rosters;
+                            var rosters = [];
+                            for (var i = 0; i < data.length; i++) {
+                                rosters.push( { roster: data[i].slug, rosterName: data[i].descr, order : data[i].strm});
+                            }
+                            rosters.push({roster: "All", rosterName: "All Semesters", order:"9999" });
+                            callback(rosters);
+                        };
+                    },
+                    onChange: function(value) {
+                        console.log("value: " + value);
+                        if (!value) {
+                            select_subject.clearOptions();
+                            return;
+                        }
+                        if (value == "All") {
+                            value = "SP17";
+                        }
+                        select_subject.clearOptions();
+                        select_subject.load(function(callback) {
+                            console.log("load");
+                            var requestSubjects = new XMLHttpRequest();
+                            requestSubjects.open('GET', "https://classes.cornell.edu/api/2.0/config/subjects.json?roster=" + value, true);
+                            requestSubjects.send();
+                             
+                            requestSubjects.onreadystatechange = function(e) {
+                                if (this.readyState != 4 || this.status != 200) {
+                                    return;
+                                }
+                                data = JSON.parse(this.responseText).data.subjects;
+                                var options =[];
+                                for (var i = 0; i < data.length; i++) {
+                                    options.push({subjectName: data[i].descr, subject: data[i].value});
+                                }
+                                console.log(options);
+                                callback(options);
+                                select_subject.enable();
+                            };
+                        });
+                    }
+                });
+
                 $select_subject = $('#select-subject').selectize({
                     persist: false,
                     maxItems: 2,
@@ -38,10 +125,6 @@
                     sortField: [
                         {field: 'subjectName', direction: 'asc'},
                         {field: 'subject', direction: 'asc'}
-                    ],
-                    options: [
-                        {subjectName: 'Computer Science', subject: 'CS'},
-                        {subjectName: 'Applied Economics Management', subject: 'AEM'}
                     ],
                     render: {
                         item: function(item, escape) {
@@ -65,10 +148,24 @@
                         console.log("filter: " + input);
                         return true;
                     },
-                    create: function(input) {
-                        console.log("create: " + input);
-                        
-                        return {subjectName : input.subjectName };
+                    load: function(query, callback) {
+                        console.log("load");
+                        var requestSubjects = new XMLHttpRequest();
+                        requestSubjects.open('GET', "https://classes.cornell.edu/api/2.0/config/subjects.json?roster=SP17", true);
+                        requestSubjects.send();
+                         
+                        requestSubjects.onreadystatechange = function(e) {
+                            if (this.readyState != 4 || this.status != 200) {
+                                return;
+                            }
+                            data = JSON.parse(this.responseText).data.subjects;
+                            var options =[];
+                            for (var i = 0; i < data.length; i++) {
+                                options.push({subjectName: data[i].descr, subject: data[i].value})
+                            }
+                            console.log(options);
+                            callback(options);       
+                        };
                     },
                     onChange: function(value) {
                         console.log("value: " + value);
@@ -76,14 +173,22 @@
                             return;
                         }
                         clearGraph();
-                        addSubjectToGraph(value[0]);
+                        addSubjectToGraph(select_roster.getValue(), value[0]);
                         return;
                     }
                 });
-        </script>
-        <div class="index">
-            <svg width="1200" height="700"></svg>
-            <script src="app.js"></script>
+
+                select_roster  = $select_roster[0].selectize;
+                select_subject = $select_subject[0].selectize;
+
+                select_subject.disable();
+
+                </script>
+            </div>
+            <div class="index">
+                <svg width="1200" height="700"></svg>
+                <script src="app.js"></script>
+            </div>
         </div>
     </body>
 </html>     
