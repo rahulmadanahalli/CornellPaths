@@ -224,7 +224,10 @@ var node = svg.append("g")
     });
 
 function getClassInfo(d) {
+    console.log(d.id);
     var classInfo = classDesc[d.id];
+    console.log(classInfo);
+
     return "<b><a href='" + classInfo.link + "' target=\"_blank\">" + d.id + "</a>: " + classInfo.name + "</b><br/><p>" + classInfo.description + "<br/>" + classInfo.prereq + "</p>";
 }
 
