@@ -24,11 +24,11 @@
         <script type="text/javascript" src="data.js"></script>
         <div id="wrapper">
             <div class="demo">
-                <div class="control-group">
+                <div class="control-group" style="float: left;" >
                     <label for="select-roster">Roster</label>
                     <select id="select-roster" class="rosters" placeholder="Pick a semester!"></select>
                 </div>
-                <div class="control-group">
+                <div class="control-group" style="float: left;" >
                     <label for="select-subject">Subject</label>
                     <select id="select-subject" class="subjects" placeholder="Pick a subject!"></select>
                 </div> 
@@ -51,7 +51,6 @@
                             var name = item.rosterName;
                             return '<div>' +
                                 (name ? '<span class="rosterName">' + escape(name) + '</span>' : '') +
-                                (item.roster ? '<span class="roster">' + escape(item.roster) + '</span>' : '') +
                             '</div>';
                         },
                         option: function(item, escape) {
@@ -185,6 +184,9 @@
                 select_subject.disable();
 
                 </script>
+                <div id="classdesc" style = "float: left; font-size: 12px; width: 750px" >
+                    Blue links are pre-reqs, red links are classes you can take next 
+                </div>
             </div>
             <div class="index">
                 <svg width="1200" height="700"></svg>

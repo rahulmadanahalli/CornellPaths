@@ -32,7 +32,7 @@ function addSubjectToGraph(roster, subjects) {
 }
 
 function getClasses(subjects, rosters) {
-    var classes = [];
+    var allClasses = [];
     for (var j = 0; j < subjects.length; j++) {
         for (var i = 0; i < rosters.length; i++) {
             var requestClassesForSemester = new XMLHttpRequest();
@@ -45,11 +45,15 @@ function getClasses(subjects, rosters) {
 
             if (requestClassesForSemester.readyState != 4 || requestClassesForSemester.status != 200) {
                     continue;
-                }
-            var response = JSON.parse(requestClassesForSemester.responseText);
-            classes = classes.concat(response.data.classes);
+            }
+            
+            var classes = JSON.parse(requestClassesForSemester.responseText).data.classes;
+            classes.forEach( function(c) {
+              c["roster"] = rosters[i];
+            });
+            
+            allClasses = allClasses.concat(classes);
         }
     }
-    console.log(classes);
-    createGraph(subjects, classes);
+    createGraph(subjects, allClasses);
 }

@@ -44,7 +44,7 @@ p, .control-group {
 }
 
 .demo select, .demo input, .demo .selectize-control {
-	width: 35%;
+	width: 300px;
 	margin: 0 10px 10px 0;
 }
 .demo .value {

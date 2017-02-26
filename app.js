@@ -16,12 +16,15 @@ var nodesMap = {};
 var linksMap = {};
 var nodesList = [];
 var linksList = [];
+var classDesc = {};
+
 
 function createGraph(subjects, classes) {
     nodesMap = {};
     linksMap = {};
     nodesList = [];
     linksList= [];
+    classDesc = {};
 
     zoom = d3.zoom().scaleExtent([min_zoom,max_zoom]);
     svg = d3.select("svg");
@@ -29,7 +32,6 @@ function createGraph(subjects, classes) {
     height = +svg.attr("height");
 
 
-    console.log("got here");
     var simulation = d3.forceSimulation()
     .force("link", d3.forceLink()
         .id(function(d) { return d.id; }) // specifies that a link's source/target refers to the id of the node.
@@ -64,6 +66,7 @@ zoom.on("zoom", function() {
 var blacklist = [];
 var combined = {};
 
+//creates cross-listed classes
 for (var i = 0; i < classes.length; i++) {
     var collegeClass = classes[i];
     var crossListedClasses = collegeClass.enrollGroups[0].simpleCombinations;
@@ -85,14 +88,13 @@ for (var i = 0; i < classes.length; i++) {
             combined[className] = combinedName;
         }
     }
+    
 }
-console.log("YOOOOO");
 console.log(combined);
 console.log(blacklist);
 
 for (var i = 0; i < classes.length; i++) {
     var collegeClass = classes[i];
-    //console.log(collegeClass.enrollGroups[0].simpleCombinations);
     var preReqString = collegeClass.catalogPrereqCoreq;
     var className = collegeClass.subject + " " + collegeClass.catalogNbr;
     className = combined[className] ? combined[className] : className;
@@ -117,7 +119,10 @@ for (var i = 0; i < classes.length; i++) {
             addLinks(combined, blacklist, className, preReqSentence, "prereq");
         }
     }
-    
+    classDesc[className] = {"name": collegeClass.titleLong,
+     "description": collegeClass.description,
+     "link": "https://classes.cornell.edu/browse/roster/" + collegeClass.roster + "/class/" + collegeClass.subject + "/" + collegeClass.catalogNbr,
+     "prereq": collegeClass.catalogPrereqCoreq};
 }
 
 function addLinks(combined, blacklist, className, preReqString, type) {
@@ -212,7 +217,16 @@ var node = svg.append("g")
     .on("mouseout", function (d) {
         svg.style("cursor","move");
         exit_highlight(d);
+    })
+    .on("click", function (d) {
+        document.getElementById('classdesc').innerHTML = "";
+        document.getElementById('classdesc').innerHTML = getClassInfo(d);
     });
+
+function getClassInfo(d) {
+    var classInfo = classDesc[d.id];
+    return "<b><a href='" + classInfo.link + "' target=\"_blank\">" + d.id + "</a>: " + classInfo.name + "</b><br/><p>" + classInfo.description + "\n" + classInfo.prereq + "</p>";
+}
 
 function set_highlight(d) {
     svg.style("cursor","pointer");
@@ -220,7 +234,7 @@ function set_highlight(d) {
         d = focus_node;
     }
     highlight_node = d;
-
+    console.log(d);
     /*
     var prereqs = d.prereqs;
     for (var i = 0; i < prereqs.length; i++) {

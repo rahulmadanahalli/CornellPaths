@@ -1,3 +1,7 @@
+.selectize-control.rosters {
+	width: 125px;
+}
+
 .selectize-control.rosters .selectize-input > div {
 	padding: 1px 10px;
 	font-size: 13px;
