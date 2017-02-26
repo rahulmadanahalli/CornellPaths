@@ -92,6 +92,7 @@
                         if (value == "All") {
                             value = "SP17";
                         }
+                        clearGraph();
                         select_subject.clearOptions();
                         select_subject.load(function(callback) {
                             console.log("load");
@@ -173,7 +174,7 @@
                             return;
                         }
                         clearGraph();
-                        addSubjectToGraph(select_roster.getValue(), value[0]);
+                        addSubjectToGraph(select_roster.getValue(), value);
                         return;
                     }
                 });

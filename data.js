@@ -5,11 +5,11 @@ function clearGraph() {
 }
 
 
-function addSubjectToGraph(roster, subject) {
+function addSubjectToGraph(roster, subjects) {
     if (roster != "All") {
         var rosters = [roster];
         console.log(roster);
-        getClasses(subject, rosters);
+        getClasses(subjects, rosters);
         return;
     }
     var requestRosters = new XMLHttpRequest();
@@ -26,28 +26,30 @@ function addSubjectToGraph(roster, subject) {
         for (var i = 0; i < data.length; i++) {
             rosters.push(data[i].slug);
         }
-        getClasses(subject, rosters);
+        getClasses(subjects, rosters);
     };
 
 }
 
-function getClasses(subject, rosters) {
+function getClasses(subjects, rosters) {
     var classes = [];
-    for (var i = 0; i < rosters.length; i++) {
-        var requestClassesForSemester = new XMLHttpRequest();
-        requestClassesForSemester.open('GET', "https://classes.cornell.edu/api/2.0/search/classes.json?roster=" + rosters[i] + "&subject=" + subject, false);
-        try {
-            requestClassesForSemester.send();
-        } catch (err) {
-            continue;
-        }
+    for (var j = 0; j < subjects.length; j++) {
+        for (var i = 0; i < rosters.length; i++) {
+            var requestClassesForSemester = new XMLHttpRequest();
+            requestClassesForSemester.open('GET', "https://classes.cornell.edu/api/2.0/search/classes.json?roster=" + rosters[i] + "&subject=" + subjects[j], false);
+            try {
+                requestClassesForSemester.send();
+            } catch (err) {
+                continue;
+            }
 
-        if (requestClassesForSemester.readyState != 4 || requestClassesForSemester.status != 200) {
-            continue;
-        }
-        var response = JSON.parse(requestClassesForSemester.responseText);
-        classes = classes.concat(response.data.classes);
+            if (requestClassesForSemester.readyState != 4 || requestClassesForSemester.status != 200) {
+                    continue;
+                }
+            var response = JSON.parse(requestClassesForSemester.responseText);
+            classes = classes.concat(response.data.classes);
+        }
     }
     console.log(classes);
-    createGraph(subject, classes);
+    createGraph(subjects, classes);
 }

@@ -17,7 +17,7 @@ var linksMap = {};
 var nodesList = [];
 var linksList = [];
 
-function createGraph(subject, classes) {
+function createGraph(subjects, classes) {
     nodesMap = {};
     linksMap = {};
     nodesList = [];
@@ -71,18 +71,24 @@ for (var i = 0; i < classes.length; i++) {
     for (var j = 0; j < crossListedClasses.length; j++) {
         var crossListedClass = crossListedClasses[j];
         var crossListedClassName = crossListedClass.subject + " " + crossListedClass.catalogNbr;
-        if (crossListedClass.subject != subject) {
+        if (subjects.indexOf(crossListedClass.subject) == -1) {
             blacklist.push(crossListedClassName);
         } else if (!combined[className] && collegeClass.catalogNbr != crossListedClass.catalogNbr) {
-            var combinedName = (collegeClass.catalogNbr < crossListedClass.catalogNbr) ? 
+            if (collegeClass.subject != crossListedClass.subject) {
+                var combinedName = className + "/" + crossListedClassName;
+            } else {
+                var combinedName = (collegeClass.catalogNbr < crossListedClass.catalogNbr) ? 
                                     collegeClass.subject + " " + collegeClass.catalogNbr + "/" + crossListedClass.catalogNbr
-                                    : collegeClass.subject + " " + crossListedClass.catalogNbr + "/" + collegeClass.catalogNbr
+                                    : collegeClass.subject + " " + crossListedClass.catalogNbr + "/" + collegeClass.catalogNbr;
+            }
             combined[crossListedClassName] = combinedName;
             combined[className] = combinedName;
         }
     }
 }
+console.log("YOOOOO");
 console.log(combined);
+console.log(blacklist);
 
 for (var i = 0; i < classes.length; i++) {
     var collegeClass = classes[i];
