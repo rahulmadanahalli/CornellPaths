@@ -31,7 +31,7 @@ requestRosters.onreadystatechange = function(e) {
                             if (this.readyState != 4 || this.status != 200) {
                                 return;
                             }
-                            var writeIt = JSON.parse(this.responseText).data.classes;
+                            var writeIt = JSON.stringify(JSON.parse(this.responseText).data.classes);
                             console.log(roster + ": " + subject);
                             console.log(writeIt);
                             saveFile(subject + "+" + roster + ".json", writeIt);
