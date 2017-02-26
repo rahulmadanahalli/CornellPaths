@@ -20,6 +20,7 @@ requestRosters.onreadystatechange = function(e) {
                 }
                 var responseJson = JSON.parse(this.responseText);
                 var listSubjects = responseJson.data.subjects;
+                saveFile(roster + ".json", JSON.stringify(listSubjects));
                 for (var j = 0; j < listSubjects.length; j++) {
                     var subject = listSubjects[j].value;
                 
