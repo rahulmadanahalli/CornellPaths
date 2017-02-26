@@ -100,6 +100,10 @@ for (var i = 0; i < classes.length; i++) {
     className = combined[className] ? combined[className] : className;
     // adds all courses in a subject to the graph (regardless if they have any links or not)
     addToNodes(className);
+    classDesc[className] = {"name": collegeClass.titleLong,
+     "description": collegeClass.description,
+     "link": "https://classes.cornell.edu/browse/roster/" + collegeClass.roster + "/class/" + collegeClass.subject + "/" + collegeClass.catalogNbr,
+     "prereq": collegeClass.catalogPrereqCoreq};
     if (!preReqString) {
         continue;
     }
@@ -119,10 +123,6 @@ for (var i = 0; i < classes.length; i++) {
             addLinks(combined, blacklist, className, preReqSentence, "prereq");
         }
     }
-    classDesc[className] = {"name": collegeClass.titleLong,
-     "description": collegeClass.description,
-     "link": "https://classes.cornell.edu/browse/roster/" + collegeClass.roster + "/class/" + collegeClass.subject + "/" + collegeClass.catalogNbr,
-     "prereq": collegeClass.catalogPrereqCoreq};
 }
 
 function addLinks(combined, blacklist, className, preReqString, type) {
@@ -225,7 +225,7 @@ var node = svg.append("g")
 
 function getClassInfo(d) {
     var classInfo = classDesc[d.id];
-    return "<b><a href='" + classInfo.link + "' target=\"_blank\">" + d.id + "</a>: " + classInfo.name + "</b><br/><p>" + classInfo.description + "\n" + classInfo.prereq + "</p>";
+    return "<b><a href='" + classInfo.link + "' target=\"_blank\">" + d.id + "</a>: " + classInfo.name + "</b><br/><p>" + classInfo.description + "<br/>" + classInfo.prereq + "</p>";
 }
 
 function set_highlight(d) {
