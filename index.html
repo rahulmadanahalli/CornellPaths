@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta http-equiv="Content-Type" content="text/html">
         <title>Cornell Paths</title>
-        <meta name="author" content="Jake Rocheleau">
+        <meta name="author" content="Rahul Madanahalli">
         <link rel="shortcut icon" href="http://designm.ag/favicon.ico">
         <link rel="icon" href="http://designm.ag/favicon.ico">
            <link rel="stylesheet" href="css/selectize.css">
@@ -27,12 +27,12 @@
             <div class="demo">
                 <div class="control-group" style="float: left;" >
                     <label for="select-roster">Roster</label>
-                    <select id="select-roster" class="rosters" placeholder="Pick a semester!"></select>
+                    <select id="select-roster" class="rosters" placeholder="(ie. 'All', 'FA17')"></select>
                 </div>
                 <div class="control-group" style="float: left;" >
                     <label for="select-subject">Subject</label>
-                    <select id="select-subject" class="subjects" placeholder="Pick a subject!"></select>
-                </div> 
+                    <select id="select-subject" class="subjects" placeholder="(ie. 'CS', 'PSYCH')"></select>
+                </div>
                 <script>
 
                 var select_roster, $select_roster;
@@ -164,12 +164,11 @@
                             for (var i = 0; i < data.length; i++) {
                                 options.push({subjectName: data[i].descr, subject: data[i].value})
                             }
-                            console.log(options);
                             callback(options);       
                         };
                     },
                     onChange: function(value) {
-                        console.log("value: " + value);
+                        // where the value is CS, AEM, etc.
                         if (!value) {
                             return;
                         }
@@ -181,13 +180,26 @@
 
                 select_roster  = $select_roster[0].selectize;
                 select_subject = $select_subject[0].selectize;
-
+                //Close dropdown on clicking on plugin X
+                select_roster.on('click', function() {
+                    select_roster.open();
+                });
                 select_subject.disable();
 
                 </script>
-                <div id="classdesc" style = "float: left; font-size: 12px; width: 750px" >
-                    Blue links are pre-reqs, red links are classes you can take next, click on classes for a description here.
+                <div id="classdesc" style = "float: left; font-size: 12px; width: 700px" >
+                    <b>Click there for a quick description of what this does -></b>
                 </div>
+                <div style = "float: left; font-size: 20px; width: 50px" >
+                    <button id="myButton" class="submit-button" >Help</button>
+
+                    <script type="text/javascript">
+                    document.getElementById("myButton").onclick = function () {
+                        window.open('guide.html', '_blank');
+                    };
+                </script>
+                </div>
+                
             </div>
             <div class="index">
                 <svg width="1200" height="700"></svg>
