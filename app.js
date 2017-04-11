@@ -172,7 +172,7 @@ linksList.forEach(function(link) {
          "prereq": collegeClass.catalogPrereqCoreq};
      } else {
         //this class is a prereq, but was never offered (ie. some weird CS 1114 class).
-        classDesc[link.target] = {"name": "Class was never offered",
+        classDesc[link.target] = {"name": "Class was last offered before 2014... there is no data about it",
          "description": "N/A",
          "link": "N/A",
          "prereq": "N/A"};    
@@ -200,7 +200,7 @@ linksList.forEach(function(link) {
          "prereq": collegeClass.catalogPrereqCoreq};
     } else {
         //this class is a prereq, but was never offered (ie. some weird CS 1114 class).
-        classDesc[link.source] = {"name": "Class was never offered",
+        classDesc[link.source] = {"name": "Class was last offered before 2014... there is no data about it",
          "description": "N/A",
          "link": "N/A",
          "prereq": "N/A"};        }
@@ -284,7 +284,7 @@ var node = svg.append("g")
 function set_opacity(d) {
     if (roster != "All" && (allClasses[d.id + "/" + roster] || combined[d.id.split('/')[0]])) {
         return 1;
-    } else if (roster == "All" && classDesc[d.id].name != "Class was never offered") {
+    } else if (roster == "All" && classDesc[d.id].link != "N/A") {
         return 1;
     }
     return 0.25;
