@@ -1,9 +1,6 @@
 var focus_node = null, highlight_node = null;
 var highlight_color = "blue";
 var highlight_trans = 0.1;
-var min_zoom = 0.1;
-var max_zoom = 3;
-var zoom = d3.zoom().scaleExtent([min_zoom,max_zoom]);
 var svg = d3.select("svg");
 var width = +svg.attr("width");
 var height = +svg.attr("height");
@@ -26,7 +23,6 @@ function createGraph(roster, subjects, classes, allClasses) {
     linksList= [];
     classDesc = {};
 
-    zoom = d3.zoom().scaleExtent([min_zoom,max_zoom]);
     svg = d3.select("svg");
     width = +svg.attr("width");
     height = +svg.attr("height");
@@ -53,15 +49,6 @@ function createGraph(roster, subjects, classes, allClasses) {
 
 
 
-
-
-zoom.on("zoom", function() {
-    node.attr("transform", d3.event.transform);
-    link.attr("transform", d3.event.transform);
-    text.attr("transform", d3.event.transform);
-});
-
-  svg.call(zoom);
 
 var blacklist = [];
 var combined = {};
@@ -348,16 +335,6 @@ function exit_highlight()
     }
 }
 
-
-node.on("dblclick.zoom", function(d) { d3.event.stopPropagation();
-    var dcx = (window.innerWidth/2-d.x*zoom.scale());
-    var dcy = (window.innerHeight/2-d.y*zoom.scale());
-    zoom.translate([dcx,dcy]);
-     g.attr("transform", "translate("+ dcx + "," + dcy  + ")scale(" + zoom.scale() + ")");
-     
-     
-    });
-
 var text = svg.append("g")
     .attr("class", "text")
     .selectAll("text")
@@ -414,4 +391,27 @@ function ticked() {
       .attr("y", function(d) { return d.y; });
       
 }
+
+var zoom = d3.zoom()
+    // no longer in d3 v4 - zoom initialises with zoomIdentity, so it's already at origin
+    // .translate([0, 0]) 
+    // .scale(1) 
+    .scaleExtent([.75, 2])
+    .translateExtent([[-150, -150], [width + 150, height + 150]])
+    .on("zoom", zoomed);
+
+function zoomed() {
+
+   var transform = d3.event.transform;
+   //console.log(transform.x);
+    //console.log(transform.y);
+  //g.style("stroke-width", 1.5 / d3.event.transform.k + "px");
+  // g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")"); // not in d3 v4
+    node.attr("transform", transform);
+    link.attr("transform", transform);
+    text.attr("transform", transform);
+}
+
+svg.call(zoom);
+
 }
