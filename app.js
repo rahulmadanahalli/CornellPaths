@@ -19,7 +19,7 @@ var linksList = [];
 var classDesc = {};
 
 
-function createGraph(subjects, classes) {
+function createGraph(roster, subjects, classes, allClasses) {
     nodesMap = {};
     linksMap = {};
     nodesList = [];
@@ -35,7 +35,7 @@ function createGraph(subjects, classes) {
     var simulation = d3.forceSimulation()
     .force("link", d3.forceLink()
         .id(function(d) { return d.id; }) // specifies that a link's source/target refers to the id of the node.
-        ) 
+    ) 
     .force("charge", d3.forceManyBody().distanceMax(250).strength(-150))
     .force("center", d3.forceCenter().x(width/2).y(height/2))
     .force("collide", d3.forceCollide().radius(4 * textWidth).strength(0.2))
@@ -147,6 +147,66 @@ linksList.forEach(function(link) {
   addToNodes(link.source);
   addToNodes(link.target);
   nodesMap[link.target]["prereqs"].push(link.source);
+
+
+  if (!classDesc[link.target]) {
+    // if this class isn't offered this semester or doesn't fall in desired subject
+    // (for pre-reqs that we pull in -> gives them a description)
+
+    var collegeClass = allClasses[link.target + "/" + roster];
+    if (!collegeClass) {
+        var maxC = "";
+        // is the class in another semester? if so, let's get description from there
+        for (c in allClasses) {
+            if (c.startsWith(link.target) && c > maxC) {
+                maxC = c;
+            }
+        }
+        collegeClass = allClasses[maxC];
+    }
+    if (collegeClass) {
+    
+        classDesc[link.target] = {"name": collegeClass.titleLong,
+         "description": collegeClass.description,
+         "link": "https://classes.cornell.edu/browse/roster/" + collegeClass.roster + "/class/" + collegeClass.subject + "/" + collegeClass.catalogNbr,
+         "prereq": collegeClass.catalogPrereqCoreq};
+     } else {
+        //this class is a prereq, but was never offered (ie. some weird CS 1114 class).
+        classDesc[link.target] = {"name": "Class was never offered",
+         "description": "N/A",
+         "link": "N/A",
+         "prereq": "N/A"};    
+     }
+  }
+  if (!classDesc[link.source]) {
+    // if this class isn't offered this semester or doesn't fall in desired subject
+    // (for pre-reqs that we pull in -> gives them a description)
+    var collegeClass = allClasses[link.source + "/" + roster];
+    if (!collegeClass) {
+        // is the class in another semester? if so, let's get description from there
+        var maxC = "";
+        for (c in allClasses) {
+            if (c.startsWith(link.source) && c > maxC) {
+                maxC = c;
+            }
+        }
+        collegeClass = allClasses[maxC];
+    }
+
+    if (collegeClass) {
+            classDesc[link.source] = {"name": collegeClass.titleLong,
+         "description": collegeClass.description,
+         "link": "https://classes.cornell.edu/browse/roster/" + collegeClass.roster + "/class/" + collegeClass.subject + "/" + collegeClass.catalogNbr,
+         "prereq": collegeClass.catalogPrereqCoreq};
+    } else {
+        //this class is a prereq, but was never offered (ie. some weird CS 1114 class).
+        classDesc[link.source] = {"name": "Class was never offered",
+         "description": "N/A",
+         "link": "N/A",
+         "prereq": "N/A"};        }
+    
+  }
+
 });
 
 function addToNodes(node_id) {
@@ -167,9 +227,6 @@ simulation
     .on("tick", ticked);
 simulation.force("link")
     .links(linksList);
-
-
-
             
 
     // build the arrow.
@@ -204,12 +261,7 @@ var node = svg.append("g")
     .attr("class", "nodes")
     .attr("r", radius)
     .attr("fill", function(d) { return color(d.group + 10); })
-    .attr("opacity", function(d) {
-        if (classDesc[d.id]) {
-            return 1;
-        }
-        return 0.5;
-    })
+    .attr("opacity", set_opacity)
     .attr("cy", function(d) {
         return height * (d.group - 1)/5.0 + Math.random()*height/5;
     })
@@ -228,6 +280,15 @@ var node = svg.append("g")
         document.getElementById('classdesc').innerHTML = "";
         document.getElementById('classdesc').innerHTML = getClassInfo(d);
     });
+
+function set_opacity(d) {
+    if (roster != "All" && (allClasses[d.id + "/" + roster] || combined[d.id.split('/')[0]])) {
+        return 1;
+    } else if (roster == "All" && classDesc[d.id].name != "Class was never offered") {
+        return 1;
+    }
+    return 0.25;
+}
 
 function getClassInfo(d) {
     console.log(d.id);
@@ -304,12 +365,7 @@ var text = svg.append("g")
   .enter().append("text")
     .attr("x", textWidth)
     .attr("y", ".31em")
-    .attr("opacity", function(d) {
-        if (classDesc[d.id]) {
-            return 1;
-        }
-        return 0.5;
-    })
+    .attr("opacity", set_opacity)
     .text(function(d) { return d.id; });
 
 
