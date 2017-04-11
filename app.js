@@ -392,7 +392,7 @@ var zoom = d3.zoom()
     // .translate([0, 0]) 
     // .scale(1) 
     .scaleExtent([.75, 2])
-    .translateExtent([[-150, -150], [width + 150, height + 150]])
+    .translateExtent([[-200, -200], [width + 200, height + 200]])
     .on("zoom", zoomed);
 
 function zoomed() {
