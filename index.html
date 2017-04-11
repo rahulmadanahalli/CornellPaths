@@ -57,6 +57,7 @@
                     sortField: [
                         {field: 'order', direction: 'desc'}
                     ],
+                    openOnFocus: true,
                     render: {
                         item: function(item, escape) {
                             var name = item.rosterName;
@@ -91,6 +92,8 @@
                             }
                             rosters.push({roster: "All", rosterName: "All Semesters", order:"9999" });
                             callback(rosters);
+                            select_roster.enable();
+                            select_roster.open();
                         };
                     },
                     onChange: function(value) {
@@ -119,7 +122,6 @@
                                 for (var i = 0; i < data.length; i++) {
                                     options.push({subjectName: data[i].descr, subject: data[i].value});
                                 }
-                                console.log(options);
                                 callback(options);
                                 select_subject.enable();
                             };
@@ -156,11 +158,9 @@
                         }
                     },
                     createFilter: function(input) {
-                        console.log("filter: " + input);
                         return true;
                     },
                     load: function(query, callback) {
-                        console.log("load");
                         var requestSubjects = new XMLHttpRequest();
                         requestSubjects.open('GET', "https://classes.cornell.edu/api/2.0/config/subjects.json?roster=SP17", true);
                         requestSubjects.send();
@@ -191,9 +191,11 @@
                 select_roster  = $select_roster[0].selectize;
                 select_subject = $select_subject[0].selectize;
                 //Close dropdown on clicking on plugin X
-                select_roster.on('click', function() {
-                    select_roster.open();
-                });
+              //Close dropdown on clicking on control in focus
+                select_subject.$control.on('mousedown', function() {
+                   select_subject.close();
+                 });
+
                 select_subject.disable();
 
                 </script>

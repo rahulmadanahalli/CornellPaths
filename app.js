@@ -77,8 +77,6 @@ for (var i = 0; i < classes.length; i++) {
     }
     
 }
-console.log(combined);
-console.log(blacklist);
 
 for (var i = 0; i < classes.length; i++) {
     var collegeClass = classes[i];
@@ -278,9 +276,7 @@ function set_opacity(d) {
 }
 
 function getClassInfo(d) {
-    console.log(d.id);
     var classInfo = classDesc[d.id];
-    console.log(classInfo);
 
     return "<b><a href='" + classInfo.link + "' target=\"_blank\">" + d.id + "</a>: " + classInfo.name + "</b><br/><p>" + classInfo.description + "<br/>" + classInfo.prereq + "</p>";
 }
@@ -291,7 +287,6 @@ function set_highlight(d) {
         d = focus_node;
     }
     highlight_node = d;
-    console.log(d);
     /*
     var prereqs = d.prereqs;
     for (var i = 0; i < prereqs.length; i++) {
@@ -403,10 +398,6 @@ var zoom = d3.zoom()
 function zoomed() {
 
    var transform = d3.event.transform;
-   //console.log(transform.x);
-    //console.log(transform.y);
-  //g.style("stroke-width", 1.5 / d3.event.transform.k + "px");
-  // g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")"); // not in d3 v4
     node.attr("transform", transform);
     link.attr("transform", transform);
     text.attr("transform", transform);
