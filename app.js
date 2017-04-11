@@ -204,6 +204,12 @@ var node = svg.append("g")
     .attr("class", "nodes")
     .attr("r", radius)
     .attr("fill", function(d) { return color(d.group + 10); })
+    .attr("opacity", function(d) {
+        if (classDesc[d.id]) {
+            return 1;
+        }
+        return 0.5;
+    })
     .attr("cy", function(d) {
         return height * (d.group - 1)/5.0 + Math.random()*height/5;
     })
@@ -280,24 +286,7 @@ function exit_highlight()
         }
     }
 }
-/*
 
-function dragstarted(d) {
-  if (!d3.event.active) simulation.alphaTarget(0.5).restart();
-  d.fx = d.x;
-  d.fy = d.y;
-}
-
-function dragged(d) {
-  d.fx = d3.event.x;
-  d.fy = d3.event.y;
-}
-
-function dragended(d) {
-  if (!d3.event.active) simulation.alphaTarget(0);
-  d.fx = null;
-  d.fy = null;
-}*/
 
 node.on("dblclick.zoom", function(d) { d3.event.stopPropagation();
     var dcx = (window.innerWidth/2-d.x*zoom.scale());
@@ -315,6 +304,12 @@ var text = svg.append("g")
   .enter().append("text")
     .attr("x", textWidth)
     .attr("y", ".31em")
+    .attr("opacity", function(d) {
+        if (classDesc[d.id]) {
+            return 1;
+        }
+        return 0.5;
+    })
     .text(function(d) { return d.id; });
 
 
