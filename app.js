@@ -103,8 +103,8 @@ for (var i = 0; i < classes.length; i++) {
         if (preReqSentence.indexOf("Corequisite") != -1 || 
             preReqSentence.indexOf("Prerequisite or corequisite") != -1) {
             addLinks(combined, blacklist, className, preReqSentence, "coreq");
-        } else if (preReqSentence.indexOf("Prerequisite:") != -1 ||
-            preReqSentence.indexOf("Required prerequisite:") != -1) {
+        } else if (preReqSentence.indexOf("Prerequisite") != -1 ||
+            preReqSentence.indexOf("Required prerequisite") != -1) {
             addLinks(combined, blacklist, className, preReqSentence, "prereq");
         }
     }
