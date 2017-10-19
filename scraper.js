@@ -1,3 +1,4 @@
+// used for scraping each subject + roster field of json
 var requestRosters = new XMLHttpRequest();
 requestRosters.open('GET', "https://classes.cornell.edu/api/2.0/config/rosters.json", true);
 requestRosters.send();

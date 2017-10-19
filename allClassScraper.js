@@ -22,19 +22,25 @@ for (var i = 0; i < data.length; i++) {
 }
 console.log(rosters);
  
-var requestSubjects = new XMLHttpRequest();
-requestSubjects.open('GET', "https://classes.cornell.edu/api/2.0/config/subjects.json?roster=FA17", false);
-requestSubjects.send();
 var listSubjects = [];
+var subjectsSet = {};
+for (var r = 0; r < rosters.length; r++) {
+    var requestSubjects = new XMLHttpRequest();
+    requestSubjects.open('GET', "https://classes.cornell.edu/api/2.0/config/subjects.json?roster=" + rosters[r], false);
+    requestSubjects.send();
 
-if (requestSubjects.readyState != 4 || requestSubjects.status != 200) {
-   console.log("fuck");
-}
-var responseJson = JSON.parse(requestSubjects.responseText);
-var data = responseJson.data.subjects;
-var listSubjects = [];
-for (var i = 0; i < data.length; i++) {
-    listSubjects.push(data[i].value);
+    if (requestSubjects.readyState != 4 || requestSubjects.status != 200) {
+       console.log("fuck");
+    }
+    var responseJson = JSON.parse(requestSubjects.responseText);
+    var data = responseJson.data.subjects;
+    for (var i = 0; i < data.length; i++) {
+        var subject = data[i].value;
+        if (!subjectsSet[subject]) {
+            listSubjects.push(subject);
+        }
+        subjectsSet[subject] = true;
+    }
 }
 console.log(listSubjects);
 
@@ -44,7 +50,8 @@ var result = {};
 for (var j = 0; j < listSubjects.length; j++) {
     var subject = listSubjects[j];
     // change the below loop guard to iterate over half of rosters
-    for (var i = 0; i < rosters.length; i++) {
+    //for (var i = 0; i < Math.floor(rosters.length/2); i++) {
+    for (var i = Math.floor(rosters.length/2); i < rosters.length; i++) {
         var requestClassesForSemester = new XMLHttpRequest();
 
         requestClassesForSemester.open('GET', "https://raw.githubusercontent.com/rahulmadanahalli/CornellPaths/master/json/" + subject + "%2B" + rosters[i] + ".json", false);
@@ -74,7 +81,7 @@ for (var j = 0; j < listSubjects.length; j++) {
 
 var allClassesEver = JSON.stringify(result);
 //change the name here
-saveFile("classes1.json", allClassesEver);           
+saveFile("classes2.json", allClassesEver);           
 
 function saveFile(fileName, jsonFile) {
     if ('Blob' in window) {
