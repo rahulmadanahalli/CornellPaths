@@ -15,20 +15,28 @@ for (var i = 0; i < data.length; i++) {
     rosters.push(data[i].slug);
 }
 console.log(rosters);
- 
-var requestSubjects = new XMLHttpRequest();
-requestSubjects.open('GET', "https://classes.cornell.edu/api/2.0/config/subjects.json?roster=FA17", false);
-requestSubjects.send();
-var listSubjects = [];
 
-if (requestSubjects.readyState != 4 || requestSubjects.status != 200) {
-   console.log("fuck");
-}
-var responseJson = JSON.parse(requestSubjects.responseText);
-var data = responseJson.data.subjects;
 var listSubjects = [];
-for (var i = 0; i < data.length; i++) {
-    listSubjects.push(data[i].value);
+var subjectsSet = {};
+for (var r = 0; r < rosters.length; r++) {
+    var requestSubjects = new XMLHttpRequest();
+    console.log(rosters[r]);
+    requestSubjects.open('GET', "https://classes.cornell.edu/api/2.0/config/subjects.json?roster=" + rosters[r], false);
+    requestSubjects.send();
+
+    if (requestSubjects.readyState != 4 || requestSubjects.status != 200) {
+       console.log("fuck");
+    }
+    var responseJson = JSON.parse(requestSubjects.responseText);
+    var data = responseJson.data.subjects;
+    for (var i = 0; i < data.length; i++) {
+        var subject = data[i].value;
+        console.log(subject);
+        if (!subjectsSet[subject]) {
+            listSubjects.push(subject);
+        }
+        subjectsSet[subject] = true;
+    }
 }
 console.log(listSubjects);
 
