@@ -6,7 +6,7 @@
 */
 
 // CHANGE THIS TO THE DESIRED SEMESTER, and copy paste all files to the json directory
-var roster = "FA17";
+var roster = "SP18";
 var subjectRequests = new XMLHttpRequest();
 subjectRequests.open('GET', "https://classes.cornell.edu/api/2.0/config/subjects.json?roster=" + roster, true);
 subjectRequests.send();
