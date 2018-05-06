@@ -41,7 +41,7 @@
                 </div>
                 <div class="control-group" style="float: left;" >
                     <label for="select-subject">Subject</label>
-                    <select id="select-subject" class="subjects" placeholder="(ie. 'CS', 'AEM', )"></select>
+                    <select id="select-subject" class="subjects" placeholder="Enter 1 - 2 subjects (ie. 'CS', 'AEM')"></select>
                 </div>
                 <script>
 
@@ -191,12 +191,14 @@
                 select_roster  = $select_roster[0].selectize;
                 select_subject = $select_subject[0].selectize;
                 //Close dropdown on clicking on plugin X
-              //Close dropdown on clicking on control in focus
+                //Close dropdown on clicking on control in focus
                 select_subject.$control.on('mousedown', function() {
                    select_subject.close();
                  });
 
                 select_subject.disable();
+
+                console.log(select_roster.options);
 
                 </script>
                 <div id="classdesc" style = "float: left; font-size: 12px; width: 700px" >
